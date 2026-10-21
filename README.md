@@ -1,20 +1,22 @@
 # AraWeb CRM per Claude
 
-Plugin ufficiale di [AraWeb CRM](https://crm.araweb.cloud), il gestionale dei clienti per ristoranti, negozi e altre attività. Collega Claude al tuo gestionale e gli insegna a fare bene tre lavori di tutti i giorni, con i tuoi stessi permessi.
+Plugin ufficiale di [AraWeb CRM](https://crm.araweb.cloud), il gestionale dei clienti per ristoranti, negozi e altre attività. Collega Claude al tuo gestionale e gli insegna a fare bene i lavori di tutti i giorni, con i tuoi stessi permessi.
 
 ## Cosa contiene
 
 - **Connettore AraWeb CRM** (`https://crm.araweb.cloud/mcp`): gli strumenti per leggere e aggiornare contatti, agenda, cose da fare, eventi e calendario editoriale. È lo stesso connettore della directory di Claude: se lo hai già collegato, non lo vedi doppio.
 - **Skill `giornata`**: il giro del mattino. Appuntamenti di oggi, prenotazioni online da confermare, cose da fare in scadenza, contenuti in uscita e clienti abituali da richiamare, in un riassunto breve.
 - **Skill `promozioni`**: dal «prepara gli auguri per chi compie gli anni a novembre» al testo pronto, scegliendo i destinatari solo tra chi ha dato il consenso per quel canale, con mittente e modo di disiscriversi nel testo e un tag per ricordare chi l'ha ricevuto.
-- **Skill `piano-evento`**: dalla scheda di un evento (Cenone di Capodanno, serata degustazione, saldi) al piano di comunicazione salvato nel gestionale, con le cose da fare e i contenuti in bozza nel calendario editoriale.
+- **Skill `piano-evento`**: dalla scheda di un evento (Cenone di Capodanno, serata degustazione, saldi) al piano di comunicazione salvato nel gestionale: tempi di preparazione, controlli sulle prenotazioni con il rimedio se vanno piano, il grazie dopo l'evento, le cose da fare e i contenuti in bozza nel calendario editoriale.
+- **Skill `recupero-clienti`**: due o tre messaggi distanziati per far tornare i clienti abituali che non si vedono da un po', solo a chi ha il consenso, con un tag e una lista per vedere chi è tornato.
+- **Skill `formati-canali`**: come si scrivono post Instagram, storie, reel, newsletter, WhatsApp, post su Google e volantini per un'attività locale, e come metterli nel calendario editoriale.
 
 ## Come si usa
 
 1. Aggiungi il plugin da **Personalizza → Plugin** in Claude.
 2. Nella scheda **Connettori** del plugin collega AraWeb CRM: entra con la tua email e password del gestionale e premi **Consenti**.
 3. Il titolare dell'attività deve aver acceso l'assistente AI una volta, da **Impostazioni → Assistente AI** nel gestionale.
-4. Chiedi per esempio: «com'è la giornata?», «prepara un WhatsApp per i clienti che non vengono da tre mesi», «organizziamo il Cenone di Capodanno, 80 posti a 90 euro».
+4. Chiedi per esempio: «com'è la giornata?», «prepara un WhatsApp per i clienti che non vengono da tre mesi», «organizziamo il Cenone di Capodanno, 80 posti a 90 euro», «scrivimi il post per la serata di venerdì».
 
 Istruzioni complete: [crm.araweb.cloud/collega-ai.html](https://crm.araweb.cloud/collega-ai.html).
 

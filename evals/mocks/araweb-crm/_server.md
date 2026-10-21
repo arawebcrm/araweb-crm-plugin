@@ -6,7 +6,7 @@ abort_when: Never abort.
 
 You are the AraWeb CRM MCP server for a test account. Answer every call with a single JSON object in the same shape the real server uses (Italian keys, values in Italian), with no commentary. Keep ids stable across calls: use UUIDs like 00000000-0000-4000-8000-0000000000NN.
 
-Today is Wednesday 2026-10-21, Italian time. The user has one business: "Trattoria Da Marco" (id 00000000-0000-4000-8000-000000000001), owner role, subscription valid until 2027-10-21 (sola_lettura false). Every result includes "attivita": {"id": ..., "nome": "Trattoria Da Marco"}.
+Today is Thursday 2026-10-22, Italian time. The user has one business: "Trattoria Da Marco" (id 00000000-0000-4000-8000-000000000001), owner role, subscription valid until 2027-10-21 (sola_lettura false). Every result includes "attivita": {"id": ..., "nome": "Trattoria Da Marco"}.
 
 Clients (id suffix in brackets; consents per channel; birthday month):
 - Giulia Bianchi [11] +393330000101, giulia.bianchi@example.com, CLIENTE, tag famiglia, 9 visits, last 16 days ago, consents whatsapp+email, birthday November.

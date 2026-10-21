@@ -1,0 +1,23 @@
+{
+  "name": "araweb-crm",
+  "displayName": "AraWeb CRM",
+  "version": "1.0.0",
+  "description": "Usa AraWeb CRM da Claude: il giro della giornata, le promozioni solo a chi ha dato il consenso e il piano di comunicazione degli eventi, con il connettore ufficiale del gestionale.",
+  "author": {
+    "name": "AraWeb",
+    "email": "simone@araweb.cloud",
+    "url": "https://araweb.cloud"
+  },
+  "homepage": "https://crm.araweb.cloud/collega-ai.html",
+  "privacyPolicyUrl": "https://crm.araweb.cloud/privacy.html",
+  "repository": "https://github.com/sgarb93/araweb-crm-plugin",
+  "license": "MIT",
+  "keywords": [
+    "crm",
+    "ristorante",
+    "prenotazioni",
+    "marketing",
+    "promozioni",
+    "eventi"
+  ]
+}

@@ -1,0 +1,1663 @@
+{
+ "tools": [
+  {
+   "name": "elenco_attivita",
+   "title": "Elenco delle attività",
+   "description": "Le attività commerciali (ristoranti, negozi…) su cui l'utente può lavorare con l'AI. Usalo per primo se non sai su quale attività lavorare.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {}
+   },
+   "annotations": {
+    "title": "Elenco delle attività",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "riepilogo",
+   "title": "Riepilogo dell'attività",
+   "description": "Numeri di oggi (appuntamenti, persone attese, contatti, potenziali clienti, prenotazioni online da confermare, clienti in ritardo), liste salvate, tag e categorie delle cose da fare.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     }
+    }
+   },
+   "annotations": {
+    "title": "Riepilogo dell'attività",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "cerca_contatti",
+   "title": "Cerca contatti",
+   "description": "Cerca clienti e potenziali clienti con gli stessi filtri della lista Contatti. Massimo 50 per pagina. Usalo anche prima di creare un contatto o un appuntamento, per non fare doppioni.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "testo": {
+      "description": "nome, cognome, email o parte del telefono",
+      "type": "string",
+      "maxLength": 100
+     },
+     "stato": {
+      "description": "LEAD = potenziale cliente (non ancora venuto), CLIENTE, PERSO",
+      "type": "string",
+      "enum": [
+       "LEAD",
+       "CLIENTE",
+       "PERSO"
+      ]
+     },
+     "tag": {
+      "type": "string",
+      "maxLength": 40
+     },
+     "ultima_visita": {
+      "description": "entro30 = Negli ultimi 30 giorni; entro90 = Negli ultimi 90 giorni; oltre30 = Non viene da più di 30 giorni; oltre60 = Non viene da più di 60 giorni; oltre90 = Non viene da più di 90 giorni; oltre180 = Non viene da più di 6 mesi; oltre365 = Non viene da più di un anno; mai = Mai venuto",
+      "type": "string",
+      "enum": [
+       "entro30",
+       "entro90",
+       "oltre30",
+       "oltre60",
+       "oltre90",
+       "oltre180",
+       "oltre365",
+       "mai"
+      ]
+     },
+     "numero_visite": {
+      "description": "1 = Una sola; 2 = Almeno 2; 5 = Almeno 5; 10 = Almeno 10",
+      "type": "string",
+      "enum": [
+       "1",
+       "2",
+       "5",
+       "10"
+      ]
+     },
+     "in_ritardo": {
+      "description": "solo i clienti abituali in ritardo rispetto al loro solito ritorno",
+      "type": "boolean"
+     },
+     "mese_compleanno": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12
+     },
+     "consenso": {
+      "description": "solo chi ha dato il consenso alle promozioni su questo canale",
+      "type": "string",
+      "enum": [
+       "whatsapp",
+       "email",
+       "sms"
+      ]
+     },
+     "lista": {
+      "description": "nome di una lista salvata (le trovi in riepilogo)",
+      "type": "string",
+      "maxLength": 60
+     },
+     "evento": {
+      "description": "solo chi ha una prenotazione non annullata per questo evento (da elenco_eventi)",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "solo_presenti": {
+      "description": "insieme a evento: solo chi è venuto davvero",
+      "type": "boolean"
+     },
+     "pagina": {
+      "default": 1,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000
+     }
+    }
+   },
+   "annotations": {
+    "title": "Cerca contatti",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "scheda_contatto",
+   "title": "Scheda di un contatto",
+   "description": "Dati di un contatto: recapiti, tag, note, consensi alle promozioni, visite e spesa, frequenza di ritorno, ultimi appuntamenti e ultime note. Le allergie non sono mai disponibili tramite AI.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "contatto_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di contatto (dai risultati degli altri strumenti)"
+     }
+    },
+    "required": [
+     "contatto_id"
+    ]
+   },
+   "annotations": {
+    "title": "Scheda di un contatto",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "agenda",
+   "title": "Agenda",
+   "description": "Appuntamenti ed eventi di un giorno o di più giorni (ora italiana). Senza data: oggi.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "dal": {
+      "description": "primo giorno, AAAA-MM-GG (default oggi)",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+     },
+     "giorni": {
+      "default": 1,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 31
+     }
+    }
+   },
+   "annotations": {
+    "title": "Agenda",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "elenco_cose_da_fare",
+   "title": "Cose da fare",
+   "description": "Cose da fare non ancora completate (nel gestionale: pagina Attività), dalla scadenza più vicina.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "solo_mie": {
+      "default": false,
+      "description": "solo quelle assegnate all'utente",
+      "type": "boolean"
+     },
+     "evento_id": {
+      "description": "solo quelle di questo evento",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     }
+    }
+   },
+   "annotations": {
+    "title": "Cose da fare",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "guida",
+   "title": "Guida del gestionale",
+   "description": "Manuale d'uso di AraWeb CRM per rispondere a \"come faccio a…\". Senza argomento: l'elenco degli argomenti. argomento \"csv\": guida completa per preparare il file di import dei contatti di questa attività.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "argomento": {
+      "type": "string",
+      "maxLength": 40
+     },
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     }
+    }
+   },
+   "annotations": {
+    "title": "Guida del gestionale",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "chiedi_assistenza",
+   "title": "Scrivi all'assistenza AraWeb",
+   "description": "Apre una richiesta all'assistenza di AraWeb a nome dell'utente, quando la guida non basta o qualcosa non funziona. Prima chiedi conferma all'utente e riassumi cosa invierai. La risposta arriva per email all'utente.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "argomento": {
+      "type": "string",
+      "enum": [
+       "problema",
+       "domanda",
+       "pagamenti",
+       "idea"
+      ],
+      "description": "problema = Qualcosa non funziona; domanda = Come si fa…; pagamenti = Abbonamento, pagamenti e fatture; idea = Idea o richiesta di una funzione"
+     },
+     "oggetto": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 150
+     },
+     "messaggio": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 5000,
+      "description": "cosa voleva fare l'utente, cosa è successo, eventuali messaggi di errore"
+     }
+    },
+    "required": [
+     "argomento",
+     "oggetto",
+     "messaggio"
+    ]
+   },
+   "annotations": {
+    "title": "Scrivi all'assistenza AraWeb",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "crea_contatto",
+   "title": "Crea un contatto",
+   "description": "Aggiunge un cliente o potenziale cliente. Serve almeno telefono o email. Se esiste già qualcuno con la stessa email o lo stesso telefono, non crea un doppione: completa i dati che mancano.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "nome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+     },
+     "cognome": {
+      "type": "string",
+      "maxLength": 100
+     },
+     "telefono": {
+      "description": "cellulare; per l'estero con prefisso internazionale",
+      "type": "string",
+      "maxLength": 30
+     },
+     "email": {
+      "type": "string",
+      "maxLength": 200
+     },
+     "tag": {
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+       "type": "string",
+       "maxLength": 40
+      }
+     },
+     "note": {
+      "description": "note fisse sul cliente (preferenze ecc.). Mai dati sulla salute.",
+      "type": "string",
+      "maxLength": 2000
+     },
+     "stato": {
+      "default": "CLIENTE",
+      "description": "LEAD se non è ancora mai venuto",
+      "type": "string",
+      "enum": [
+       "LEAD",
+       "CLIENTE"
+      ]
+     }
+    },
+    "required": [
+     "nome"
+    ]
+   },
+   "annotations": {
+    "title": "Crea un contatto",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "modifica_contatto",
+   "title": "Modifica un contatto",
+   "description": "Cambia nome, cognome, telefono, email, data di nascita o stato di un contatto, e aggiunge o toglie tag. Solo i campi indicati cambiano. Consensi e allergie non si modificano tramite AI.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "contatto_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di contatto (dai risultati degli altri strumenti)"
+     },
+     "nome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+     },
+     "cognome": {
+      "description": "stringa vuota per toglierlo",
+      "type": "string",
+      "maxLength": 100
+     },
+     "telefono": {
+      "description": "stringa vuota per toglierlo",
+      "type": "string",
+      "maxLength": 30
+     },
+     "email": {
+      "description": "stringa vuota per toglierla",
+      "type": "string",
+      "maxLength": 200
+     },
+     "data_di_nascita": {
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+       },
+       {
+        "type": "string",
+        "const": ""
+       }
+      ]
+     },
+     "stato": {
+      "type": "string",
+      "enum": [
+       "LEAD",
+       "CLIENTE",
+       "PERSO"
+      ]
+     },
+     "aggiungi_tag": {
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+       "type": "string",
+       "maxLength": 40
+      }
+     },
+     "togli_tag": {
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+       "type": "string",
+       "maxLength": 40
+      }
+     }
+    },
+    "required": [
+     "contatto_id"
+    ]
+   },
+   "annotations": {
+    "title": "Modifica un contatto",
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "aggiungi_nota",
+   "title": "Aggiungi una nota",
+   "description": "Aggiunge alla cronologia del contatto una nota, una telefonata, un messaggio o un incontro. Mai dati sulla salute.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "contatto_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di contatto (dai risultati degli altri strumenti)"
+     },
+     "testo": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 5000
+     },
+     "tipo": {
+      "default": "nota",
+      "type": "string",
+      "enum": [
+       "telefonata",
+       "email",
+       "whatsapp",
+       "incontro",
+       "nota"
+      ]
+     },
+     "ricevuta": {
+      "default": false,
+      "description": "true se è il cliente ad aver chiamato o scritto",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "contatto_id",
+     "testo"
+    ]
+   },
+   "annotations": {
+    "title": "Aggiungi una nota",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "crea_appuntamento",
+   "title": "Crea un appuntamento",
+   "description": "Mette in agenda un appuntamento (prenotazione) per un contatto esistente o per un cliente nuovo (nome + telefono), oppure un evento interno senza cliente (serve il titolo). Con evento_id è una prenotazione per un evento aperto al pubblico: se i posti finiscono avvisa l'utente. Orario in ora italiana.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "inizio": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$",
+      "description": "data e ora italiana, es. 2026-10-10T20:30"
+     },
+     "contatto_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di contatto (dai risultati degli altri strumenti)"
+     },
+     "nuovo_cliente": {
+      "description": "solo se il cliente non è già tra i contatti (prima cercalo con cerca_contatti)",
+      "type": "object",
+      "properties": {
+       "nome": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+       },
+       "cognome": {
+        "type": "string",
+        "maxLength": 100
+       },
+       "telefono": {
+        "type": "string",
+        "maxLength": 30
+       }
+      },
+      "required": [
+       "nome",
+       "telefono"
+      ]
+     },
+     "titolo": {
+      "description": "nome dell'evento interno, es. \"Festa di laurea Rossi\"",
+      "type": "string",
+      "maxLength": 120
+     },
+     "persone": {
+      "default": 1,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 500
+     },
+     "durata_minuti": {
+      "default": 60,
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 1440
+     },
+     "note": {
+      "type": "string",
+      "maxLength": 2000
+     },
+     "confermato": {
+      "default": false,
+      "description": "true se il cliente ha già confermato",
+      "type": "boolean"
+     },
+     "evento_id": {
+      "description": "prenotazione per un evento aperto al pubblico (da elenco_eventi)",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "sede": {
+      "description": "nome della sede, se l'attività ne ha più di una (le trovi in riepilogo); senza, la sede principale o quella dell'evento",
+      "type": "string",
+      "maxLength": 80
+     }
+    },
+    "required": [
+     "inizio"
+    ]
+   },
+   "annotations": {
+    "title": "Crea un appuntamento",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "aggiorna_appuntamento",
+   "title": "Aggiorna un appuntamento",
+   "description": "Cambia lo stato (confermato, arrivato, non presentato, annullato), la spesa, l'orario, le persone o le note di un appuntamento. \"Arrivato\" registra la visita: un potenziale cliente diventa cliente.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "appuntamento_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di appuntamento (dai risultati degli altri strumenti)"
+     },
+     "stato": {
+      "type": "string",
+      "enum": [
+       "PRENOTATO",
+       "CONFERMATO",
+       "ARRIVATO",
+       "NON_PRESENTATO",
+       "ANNULLATO"
+      ]
+     },
+     "spesa_euro": {
+      "description": "quanto ha speso; null per toglierla",
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 999999
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "inizio": {
+      "description": "nuovo orario, ora italiana",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$"
+     },
+     "persone": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 500
+     },
+     "note": {
+      "type": "string",
+      "maxLength": 2000
+     },
+     "evento_id": {
+      "description": "collega la prenotazione a un evento; stringa vuota per scollegarla",
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+        "description": "id di evento (dai risultati degli altri strumenti)"
+       },
+       {
+        "type": "string",
+        "const": ""
+       }
+      ]
+     }
+    },
+    "required": [
+     "appuntamento_id"
+    ]
+   },
+   "annotations": {
+    "title": "Aggiorna un appuntamento",
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "crea_cosa_da_fare",
+   "title": "Crea una cosa da fare",
+   "description": "Aggiunge una cosa da fare (nel gestionale: pagina Attività), assegnata all'utente, con scadenza e se serve un contatto o un appuntamento collegato.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "titolo": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+     },
+     "scadenza": {
+      "description": "AAAA-MM-GG, default oggi",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+     },
+     "contatto_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di contatto (dai risultati degli altri strumenti)"
+     },
+     "appuntamento_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di appuntamento (dai risultati degli altri strumenti)"
+     },
+     "evento_id": {
+      "description": "per le scadenze di un evento (ordini, stampa, post da pubblicare)",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "categoria": {
+      "description": "nome di una categoria (le trovi in riepilogo)",
+      "type": "string",
+      "maxLength": 40
+     },
+     "note": {
+      "type": "string",
+      "maxLength": 5000
+     }
+    },
+    "required": [
+     "titolo"
+    ]
+   },
+   "annotations": {
+    "title": "Crea una cosa da fare",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "segna_cosa_da_fare",
+   "title": "Segna una cosa da fare",
+   "description": "Segna una cosa da fare come fatta, in corso o di nuovo da fare.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "cosa_da_fare_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di cosa da fare (dai risultati degli altri strumenti)"
+     },
+     "stato": {
+      "default": "FATTO",
+      "type": "string",
+      "enum": [
+       "DA_FARE",
+       "IN_CORSO",
+       "FATTO"
+      ]
+     }
+    },
+    "required": [
+     "cosa_da_fare_id"
+    ]
+   },
+   "annotations": {
+    "title": "Segna una cosa da fare",
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "tag_in_blocco",
+   "title": "Tag a più contatti",
+   "description": "Aggiunge o toglie un tag a più contatti insieme (massimo 200): quelli indicati per id, oppure tutti quelli che rispondono ai filtri (stessi filtri di cerca_contatti). Prima mostra all'utente quanti sono con cerca_contatti.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "tag_da_cambiare": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40,
+      "description": "il tag da aggiungere o togliere"
+     },
+     "azione": {
+      "type": "string",
+      "enum": [
+       "aggiungi",
+       "togli"
+      ]
+     },
+     "contatto_ids": {
+      "maxItems": 200,
+      "type": "array",
+      "items": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+      }
+     },
+     "testo": {
+      "description": "nome, cognome, email o parte del telefono",
+      "type": "string",
+      "maxLength": 100
+     },
+     "stato": {
+      "description": "LEAD = potenziale cliente (non ancora venuto), CLIENTE, PERSO",
+      "type": "string",
+      "enum": [
+       "LEAD",
+       "CLIENTE",
+       "PERSO"
+      ]
+     },
+     "tag": {
+      "type": "string",
+      "maxLength": 40
+     },
+     "ultima_visita": {
+      "description": "entro30 = Negli ultimi 30 giorni; entro90 = Negli ultimi 90 giorni; oltre30 = Non viene da più di 30 giorni; oltre60 = Non viene da più di 60 giorni; oltre90 = Non viene da più di 90 giorni; oltre180 = Non viene da più di 6 mesi; oltre365 = Non viene da più di un anno; mai = Mai venuto",
+      "type": "string",
+      "enum": [
+       "entro30",
+       "entro90",
+       "oltre30",
+       "oltre60",
+       "oltre90",
+       "oltre180",
+       "oltre365",
+       "mai"
+      ]
+     },
+     "numero_visite": {
+      "description": "1 = Una sola; 2 = Almeno 2; 5 = Almeno 5; 10 = Almeno 10",
+      "type": "string",
+      "enum": [
+       "1",
+       "2",
+       "5",
+       "10"
+      ]
+     },
+     "in_ritardo": {
+      "description": "solo i clienti abituali in ritardo rispetto al loro solito ritorno",
+      "type": "boolean"
+     },
+     "mese_compleanno": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12
+     },
+     "consenso": {
+      "description": "solo chi ha dato il consenso alle promozioni su questo canale",
+      "type": "string",
+      "enum": [
+       "whatsapp",
+       "email",
+       "sms"
+      ]
+     },
+     "lista": {
+      "description": "nome di una lista salvata (le trovi in riepilogo)",
+      "type": "string",
+      "maxLength": 60
+     },
+     "evento": {
+      "description": "solo chi ha una prenotazione non annullata per questo evento (da elenco_eventi)",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "solo_presenti": {
+      "description": "insieme a evento: solo chi è venuto davvero",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "tag_da_cambiare",
+     "azione"
+    ]
+   },
+   "annotations": {
+    "title": "Tag a più contatti",
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "crea_lista",
+   "title": "Crea una lista salvata",
+   "description": "Salva una ricerca di contatti con un nome, con gli stessi filtri di cerca_contatti (es. \"Compleanni di novembre con WhatsApp\"). Nel gestionale compare in Contatti → Liste salvate e resta sempre aggiornata. Con lo stesso nome sostituisce la lista esistente.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "nome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+     },
+     "testo": {
+      "description": "nome, cognome, email o parte del telefono",
+      "type": "string",
+      "maxLength": 100
+     },
+     "stato": {
+      "description": "LEAD = potenziale cliente (non ancora venuto), CLIENTE, PERSO",
+      "type": "string",
+      "enum": [
+       "LEAD",
+       "CLIENTE",
+       "PERSO"
+      ]
+     },
+     "tag": {
+      "type": "string",
+      "maxLength": 40
+     },
+     "ultima_visita": {
+      "description": "entro30 = Negli ultimi 30 giorni; entro90 = Negli ultimi 90 giorni; oltre30 = Non viene da più di 30 giorni; oltre60 = Non viene da più di 60 giorni; oltre90 = Non viene da più di 90 giorni; oltre180 = Non viene da più di 6 mesi; oltre365 = Non viene da più di un anno; mai = Mai venuto",
+      "type": "string",
+      "enum": [
+       "entro30",
+       "entro90",
+       "oltre30",
+       "oltre60",
+       "oltre90",
+       "oltre180",
+       "oltre365",
+       "mai"
+      ]
+     },
+     "numero_visite": {
+      "description": "1 = Una sola; 2 = Almeno 2; 5 = Almeno 5; 10 = Almeno 10",
+      "type": "string",
+      "enum": [
+       "1",
+       "2",
+       "5",
+       "10"
+      ]
+     },
+     "in_ritardo": {
+      "description": "solo i clienti abituali in ritardo rispetto al loro solito ritorno",
+      "type": "boolean"
+     },
+     "mese_compleanno": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12
+     },
+     "consenso": {
+      "description": "solo chi ha dato il consenso alle promozioni su questo canale",
+      "type": "string",
+      "enum": [
+       "whatsapp",
+       "email",
+       "sms"
+      ]
+     },
+     "lista": {
+      "description": "nome di una lista salvata (le trovi in riepilogo)",
+      "type": "string",
+      "maxLength": 60
+     },
+     "evento": {
+      "description": "solo chi ha una prenotazione non annullata per questo evento (da elenco_eventi)",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "solo_presenti": {
+      "description": "insieme a evento: solo chi è venuto davvero",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "nome"
+    ]
+   },
+   "annotations": {
+    "title": "Crea una lista salvata",
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "elimina_lista",
+   "title": "Elimina una lista salvata",
+   "description": "Toglie una lista salvata (le trovi in riepilogo). I contatti non vengono toccati: sparisce solo la ricerca salvata.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "nome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+     }
+    },
+    "required": [
+     "nome"
+    ]
+   },
+   "annotations": {
+    "title": "Elimina una lista salvata",
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "elenco_eventi",
+   "title": "Eventi",
+   "description": "Eventi aperti al pubblico (Cenone di Capodanno, serate, saldi, open day) con posti prenotati. Nel gestionale: Marketing → Eventi. Diversi dagli eventi interni in agenda.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "passati": {
+      "default": false,
+      "description": "true per gli eventi già passati (gli ultimi 30)",
+      "type": "boolean"
+     }
+    }
+   },
+   "annotations": {
+    "title": "Eventi",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "scheda_evento",
+   "title": "Scheda di un evento",
+   "description": "Tutto su un evento: dati, posti, prenotazioni, cose da fare, brief di marketing (pubblico, obiettivo, punti di forza, canali, budget), piano di comunicazione e i numeri della clientela utili per un piano (consensi per canale, tag più usati). Usala prima di preparare un piano di comunicazione; poi salvalo con modifica_evento.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "evento_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di evento (dai risultati degli altri strumenti)"
+     }
+    },
+    "required": [
+     "evento_id"
+    ]
+   },
+   "annotations": {
+    "title": "Scheda di un evento",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "crea_evento",
+   "title": "Crea un evento",
+   "description": "Crea un evento aperto al pubblico che raccoglie prenotazioni (es. Cenone di Capodanno, serata degustazione, saldi). Servono nome e inizio; chiedi all'utente posti, prezzo, a chi si rivolge e l'obiettivo se non li ha detti. Per un impegno senza clienti usa invece crea_appuntamento con titolo.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "nome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+     },
+     "inizio": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$",
+      "description": "data e ora italiana, es. 2026-12-31T20:30"
+     },
+     "fine": {
+      "description": "facoltativa; stringa vuota per toglierla",
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$"
+       },
+       {
+        "type": "string",
+        "const": ""
+       }
+      ]
+     },
+     "posti_max": {
+      "description": "null = senza limite",
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100000
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "prezzo_euro": {
+      "description": "a persona, solo informativo",
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 99999
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "descrizione": {
+      "description": "menu, programma, cosa è incluso",
+      "type": "string",
+      "maxLength": 5000
+     },
+     "pubblico": {
+      "description": "es. Famiglie, Coppie, Gruppi di amici, Aziende, Turisti, Giovani, Over 60, o altre voci",
+      "maxItems": 15,
+      "type": "array",
+      "items": {
+       "type": "string",
+       "maxLength": 40
+      }
+     },
+     "obiettivo": {
+      "description": "es. 80 coperti, almeno 30 clienti nuovi",
+      "type": "string",
+      "maxLength": 500
+     },
+     "punti_di_forza": {
+      "type": "string",
+      "maxLength": 2000
+     },
+     "canali": {
+      "description": "dove promuoverlo",
+      "type": "array",
+      "items": {
+       "type": "string",
+       "enum": [
+        "instagram",
+        "facebook",
+        "tiktok",
+        "whatsapp",
+        "email",
+        "google",
+        "volantini"
+       ]
+      }
+     },
+     "budget_euro": {
+      "description": "budget per la pubblicità",
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 9999999
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "piano": {
+      "description": "piano di comunicazione (testo)",
+      "type": "string",
+      "maxLength": 20000
+     },
+     "prenotabile_online": {
+      "description": "pagina pubblica dove i clienti prenotano da soli (link e QR); si chiude da sola a posti finiti",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "nome",
+     "inizio"
+    ]
+   },
+   "annotations": {
+    "title": "Crea un evento",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "modifica_evento",
+   "title": "Modifica un evento",
+   "description": "Cambia i dati di un evento, il brief di marketing o il piano di comunicazione, oppure apre e chiude le prenotazioni. Cambiano solo i campi indicati.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "evento_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di evento (dai risultati degli altri strumenti)"
+     },
+     "nome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+     },
+     "inizio": {
+      "description": "data e ora italiana, es. 2026-12-31T20:30",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$"
+     },
+     "fine": {
+      "description": "facoltativa; stringa vuota per toglierla",
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$"
+       },
+       {
+        "type": "string",
+        "const": ""
+       }
+      ]
+     },
+     "posti_max": {
+      "description": "null = senza limite",
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100000
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "prezzo_euro": {
+      "description": "a persona, solo informativo",
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 99999
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "descrizione": {
+      "description": "menu, programma, cosa è incluso",
+      "type": "string",
+      "maxLength": 5000
+     },
+     "pubblico": {
+      "description": "es. Famiglie, Coppie, Gruppi di amici, Aziende, Turisti, Giovani, Over 60, o altre voci",
+      "maxItems": 15,
+      "type": "array",
+      "items": {
+       "type": "string",
+       "maxLength": 40
+      }
+     },
+     "obiettivo": {
+      "description": "es. 80 coperti, almeno 30 clienti nuovi",
+      "type": "string",
+      "maxLength": 500
+     },
+     "punti_di_forza": {
+      "type": "string",
+      "maxLength": 2000
+     },
+     "canali": {
+      "description": "dove promuoverlo",
+      "type": "array",
+      "items": {
+       "type": "string",
+       "enum": [
+        "instagram",
+        "facebook",
+        "tiktok",
+        "whatsapp",
+        "email",
+        "google",
+        "volantini"
+       ]
+      }
+     },
+     "budget_euro": {
+      "description": "budget per la pubblicità",
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 9999999
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "piano": {
+      "description": "piano di comunicazione (testo)",
+      "type": "string",
+      "maxLength": 20000
+     },
+     "prenotabile_online": {
+      "description": "pagina pubblica dove i clienti prenotano da soli (link e QR); si chiude da sola a posti finiti",
+      "type": "boolean"
+     },
+     "prenotazioni_aperte": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "evento_id"
+    ]
+   },
+   "annotations": {
+    "title": "Modifica un evento",
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "elenco_contenuti",
+   "title": "Calendario editoriale",
+   "description": "Contenuti da pubblicare (post, storie, reel, newsletter, WhatsApp, volantini) in un periodo, per evento o per stato. Nel gestionale: Marketing → Calendario editoriale. Il gestionale non pubblica: tiene il piano e le approvazioni.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "dal": {
+      "description": "primo giorno, AAAA-MM-GG (default oggi)",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+     },
+     "giorni": {
+      "default": 31,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 92
+     },
+     "evento_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di evento (dai risultati degli altri strumenti)"
+     },
+     "stato": {
+      "type": "string",
+      "enum": [
+       "IDEA",
+       "BOZZA",
+       "DA_APPROVARE",
+       "APPROVATO",
+       "PUBBLICATO"
+      ]
+     }
+    }
+   },
+   "annotations": {
+    "title": "Calendario editoriale",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "crea_contenuto",
+   "title": "Aggiungi al calendario editoriale",
+   "description": "Aggiunge un contenuto al calendario editoriale (es. i post e le storie di un piano di comunicazione), assegnato all'utente. Servono canale, uscita e titolo. Mettilo in BOZZA o DA_APPROVARE: APPROVATO solo se l'utente lo chiede e ha la gestione completa.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "canale": {
+      "type": "string",
+      "enum": [
+       "instagram_post",
+       "instagram_storia",
+       "reel",
+       "facebook",
+       "tiktok",
+       "whatsapp",
+       "email",
+       "google",
+       "volantino"
+      ],
+      "description": "instagram_post = Post Instagram; instagram_storia = Storia Instagram; reel = Reel; facebook = Facebook; tiktok = TikTok; whatsapp = WhatsApp; email = Email / newsletter; google = Google; volantino = Volantino"
+     },
+     "uscita": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$",
+      "description": "quando esce, ora italiana"
+     },
+     "titolo": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+     },
+     "testo": {
+      "description": "didascalia o testo del messaggio",
+      "type": "string",
+      "maxLength": 10000
+     },
+     "grafica": {
+      "description": "cosa deve mostrare la foto o il video",
+      "type": "string",
+      "maxLength": 2000
+     },
+     "link_grafica": {
+      "description": "https://… (Canva, Drive)",
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 500
+       },
+       {
+        "type": "string",
+        "const": ""
+       }
+      ]
+     },
+     "evento_id": {
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+        "description": "id di evento (dai risultati degli altri strumenti)"
+       },
+       {
+        "type": "string",
+        "const": ""
+       }
+      ]
+     },
+     "stato": {
+      "description": "IDEA, BOZZA, DA_APPROVARE, APPROVATO (solo con gestione completa e solo se l'utente lo chiede), PUBBLICATO",
+      "type": "string",
+      "enum": [
+       "IDEA",
+       "BOZZA",
+       "DA_APPROVARE",
+       "APPROVATO",
+       "PUBBLICATO"
+      ]
+     },
+     "nota": {
+      "description": "nota di revisione",
+      "type": "string",
+      "maxLength": 1000
+     },
+     "link_pubblicato": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 500
+       },
+       {
+        "type": "string",
+        "const": ""
+       }
+      ]
+     }
+    },
+    "required": [
+     "canale",
+     "uscita",
+     "titolo"
+    ]
+   },
+   "annotations": {
+    "title": "Aggiungi al calendario editoriale",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "aggiorna_contenuto",
+   "title": "Modifica un contenuto del calendario",
+   "description": "Cambia testo, data, canale o stato di un contenuto del calendario editoriale. Approva (APPROVATO) solo chi ha la gestione completa e solo se l'utente lo chiede; chi è solo operativo che cambia un contenuto approvato lo rimanda in approvazione. Dopo la pubblicazione: stato PUBBLICATO e link_pubblicato.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "contenuto_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di contenuto (dai risultati degli altri strumenti)"
+     },
+     "canale": {
+      "type": "string",
+      "enum": [
+       "instagram_post",
+       "instagram_storia",
+       "reel",
+       "facebook",
+       "tiktok",
+       "whatsapp",
+       "email",
+       "google",
+       "volantino"
+      ],
+      "description": "instagram_post = Post Instagram; instagram_storia = Storia Instagram; reel = Reel; facebook = Facebook; tiktok = TikTok; whatsapp = WhatsApp; email = Email / newsletter; google = Google; volantino = Volantino"
+     },
+     "uscita": {
+      "description": "quando esce, ora italiana",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$"
+     },
+     "titolo": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+     },
+     "testo": {
+      "description": "didascalia o testo del messaggio",
+      "type": "string",
+      "maxLength": 10000
+     },
+     "grafica": {
+      "description": "cosa deve mostrare la foto o il video",
+      "type": "string",
+      "maxLength": 2000
+     },
+     "link_grafica": {
+      "description": "https://… (Canva, Drive)",
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 500
+       },
+       {
+        "type": "string",
+        "const": ""
+       }
+      ]
+     },
+     "evento_id": {
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+        "description": "id di evento (dai risultati degli altri strumenti)"
+       },
+       {
+        "type": "string",
+        "const": ""
+       }
+      ]
+     },
+     "stato": {
+      "description": "IDEA, BOZZA, DA_APPROVARE, APPROVATO (solo con gestione completa e solo se l'utente lo chiede), PUBBLICATO",
+      "type": "string",
+      "enum": [
+       "IDEA",
+       "BOZZA",
+       "DA_APPROVARE",
+       "APPROVATO",
+       "PUBBLICATO"
+      ]
+     },
+     "nota": {
+      "description": "nota di revisione",
+      "type": "string",
+      "maxLength": 1000
+     },
+     "link_pubblicato": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 500
+       },
+       {
+        "type": "string",
+        "const": ""
+       }
+      ]
+     }
+    },
+    "required": [
+     "contenuto_id"
+    ]
+   },
+   "annotations": {
+    "title": "Modifica un contenuto del calendario",
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  }
+ ]
+}

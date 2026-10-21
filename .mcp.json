@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "araweb-crm": {
+      "type": "http",
+      "url": "https://crm.araweb.cloud/mcp"
+    }
+  }
+}

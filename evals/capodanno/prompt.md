@@ -1,5 +1,5 @@
 ---
-description: Piano per un evento nuovo: deve leggere i numeri, proporre un calendario a ritroso e chiedere conferma prima di scrivere.
+description: "Piano per un evento nuovo: deve leggere i numeri, proporre un calendario a ritroso e chiedere conferma prima di scrivere."
 max_turns: 20
 allowed_tools: [Skill]
 ---

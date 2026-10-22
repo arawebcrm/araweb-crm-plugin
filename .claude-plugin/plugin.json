@@ -1,15 +1,18 @@
 {
   "name": "araweb-crm",
   "displayName": "AraWeb CRM",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Usa AraWeb CRM da Claude: il giro della giornata, le promozioni solo a chi ha dato il consenso, il recupero dei clienti che non tornano, il piano degli eventi e i testi per i social, con il connettore ufficiale del gestionale.",
   "author": {
     "name": "AraWeb",
     "email": "simone@araweb.cloud",
     "url": "https://araweb.cloud"
   },
-  "homepage": "https://crm.araweb.cloud/collega-ai.html",
+  "homepage": "https://araweb.cloud",
+  "documentationUrl": "https://crm.araweb.cloud/collega-ai.html",
+  "supportUrl": "https://crm.araweb.cloud/collega-ai.html#assistenza",
   "privacyPolicyUrl": "https://crm.araweb.cloud/privacy.html",
+  "termsOfServiceUrl": "https://crm.araweb.cloud/condizioni.html",
   "repository": "https://github.com/arawebcrm/araweb-crm-plugin",
   "license": "MIT",
   "keywords": [

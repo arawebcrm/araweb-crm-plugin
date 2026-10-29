@@ -1,6 +1,6 @@
 ---
 name: piano-evento
-description: Organizza un evento aperto al pubblico in AraWeb CRM e il suo piano di comunicazione (Cenone di Capodanno, serata degustazione, festa, saldi, open day). Usala quando l'utente vuole creare un evento, riempire i posti, preparare post e messaggi per promuoverlo, mettere in ordine scadenze e calendario editoriale di un evento, o capire se le prenotazioni stanno andando bene.
+description: Organizza un evento aperto al pubblico in AraWeb CRM e il suo piano di comunicazione (Cenone di Capodanno, serata degustazione, festa, saldi, open day). Usala quando l'utente vuole creare un evento, riempire i posti, preparare post e messaggi per promuoverlo, mettere in ordine scadenze e calendario editoriale di un evento, scrivere la pagina pubblica dell'evento, o capire se le prenotazioni e le campagne stanno andando bene.
 ---
 
 # Piano per un evento
@@ -31,6 +31,7 @@ Dopo il sì, in quest'ordine:
 - `modifica_evento` con `piano` (il testo del piano) e i campi del brief che erano vuoti: `pubblico`, `obiettivo`, `punti_di_forza`, `canali`, `budget_euro`.
 - `crea_cosa_da_fare` con `evento_id` per ogni preparativo interno, con la sua scadenza, e una per ogni soglia di controllo (es. «Controllare le prenotazioni: obiettivo 40 posti»).
 - `crea_contenuto` con `evento_id` per ogni post, storia, reel, email o messaggio del calendario, compreso il grazie del giorno dopo. Scrivi testo e grafica seguendo la skill `formati-canali`. Stato `BOZZA`; `APPROVATO` solo se l'utente lo chiede esplicitamente.
+- **La pagina dell'evento**, se l'evento accetta prenotazioni online o l'utente la chiede: leggi prima la guida con `guida` e argomento `pagina-evento`, poi scrivila con `modifica_landing` (copertina, punti di forza, programma o menu, galleria, domande frequenti, prenotazione). Usa solo le immagini già caricate nella scheda (gli id sono in `scheda_evento`) e non inventare foto, recensioni, urgenze o numeri: i posti rimasti li mostra la pagina da sola. Dice sempre come disdire. La pagina resta in bozza: la pubblica il titolare dal gestionale dopo l'anteprima, e tu glielo ricordi.
 
 I messaggi diretti ai clienti (WhatsApp, email, SMS) seguono le regole della skill `promozioni`: solo a chi ha il consenso per quel canale, con mittente e modo di disiscriversi nel testo. Per il grazie del giorno dopo i destinatari sono quelli di `cerca_contatti` con `evento` e `solo_presenti: true`.
 
@@ -39,3 +40,5 @@ Riassumi cosa hai creato (quante cose da fare, quanti contenuti) e dove trovarli
 
 ## Come sta andando
 Se l'utente chiede a che punto è un evento, leggi `scheda_evento` e confronta le prenotazioni con l'obiettivo e con la soglia del giorno. Se è sotto, proponi il rimedio previsto nel piano; se l'evento è passato, di' quanti sono venuti rispetto ai prenotati e proponi il grazie con la recensione.
+
+Se l'evento è promosso con campagne Facebook e Instagram, leggi `campagne` (solo per chi ha la gestione completa; altrimenti di' che i numeri li vede il titolare). Riporta spesa, contatti arrivati, quanti sono diventati clienti e costo per cliente, e dì se i numeri reggono rispetto all'obiettivo dell'evento. Le campagne non le crei tu: si creano dal gestionale (Marketing → Campagne → Nuova campagna) e le attiva l'utente.

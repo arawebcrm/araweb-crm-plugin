@@ -304,7 +304,7 @@
    "annotations": {
     "title": "Scrivi all'assistenza AraWeb",
     "readOnlyHint": false,
-    "destructiveHint": false,
+    "destructiveHint": true,
     "idempotentHint": false,
     "openWorldHint": false
    }
@@ -1041,6 +1041,28 @@
    }
   },
   {
+   "name": "campagne",
+   "title": "Campagne Facebook e Instagram",
+   "description": "Numeri delle campagne Meta dell'attività: spesa, clic, lead contati da Meta, contatti arrivati nel gestionale dal modulo dell'annuncio, quanti sono diventati clienti (venuti almeno una volta) e costo per cliente. Nel gestionale: Marketing → Campagne. Solo per chi ha la gestione completa. Una campagna con modulo si crea dal gestionale: Marketing → Campagne → Nuova campagna.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     }
+    }
+   },
+   "annotations": {
+    "title": "Campagne Facebook e Instagram",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
    "name": "elenco_eventi",
    "title": "Eventi",
    "description": "Eventi aperti al pubblico (Cenone di Capodanno, serate, saldi, open day) con posti prenotati. Nel gestionale: Marketing → Eventi. Diversi dagli eventi interni in agenda.",
@@ -1094,6 +1116,251 @@
     "readOnlyHint": true,
     "destructiveHint": false,
     "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "modifica_landing",
+   "title": "Scrivi la pagina dell'evento",
+   "description": "Scrive la pagina pubblica dell'evento a blocchi: copertina, testo, punti di forza, programma o menu, galleria, domande frequenti e il punto in cui va il modulo di prenotazione. Sostituisce tutti i blocchi. Le immagini sono quelle caricate dall'attività nella scheda dell'evento (id da scheda_evento). La pagina resta in bozza: la pubblica il titolare dal gestionale dopo l'anteprima. Prima leggi la guida con l'argomento pagina-evento e seguine le regole: titolo in copertina di al massimo 40 caratteri, almeno quattro foto vere, 3-5 punti di forza precisi, domande frequenti che tolgono i dubbi (anche come disdire), nessuna urgenza, recensione o numero inventati: posti rimasti e prenotati li mostra la pagina da sola.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "evento_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di evento (dai risultati degli altri strumenti)"
+     },
+     "blocchi": {
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+       "oneOf": [
+        {
+         "type": "object",
+         "properties": {
+          "tipo": {
+           "type": "string",
+           "const": "copertina"
+          },
+          "titolo": {
+           "type": "string",
+           "maxLength": 120
+          },
+          "sottotitolo": {
+           "type": "string",
+           "maxLength": 300
+          },
+          "immagine": {
+           "type": "string",
+           "format": "uuid",
+           "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+         },
+         "required": [
+          "tipo"
+         ]
+        },
+        {
+         "type": "object",
+         "properties": {
+          "tipo": {
+           "type": "string",
+           "const": "testo"
+          },
+          "titolo": {
+           "type": "string",
+           "maxLength": 120
+          },
+          "testo": {
+           "type": "string",
+           "minLength": 1,
+           "maxLength": 3000
+          }
+         },
+         "required": [
+          "tipo",
+          "testo"
+         ]
+        },
+        {
+         "type": "object",
+         "properties": {
+          "tipo": {
+           "type": "string",
+           "const": "punti"
+          },
+          "titolo": {
+           "type": "string",
+           "maxLength": 120
+          },
+          "voci": {
+           "minItems": 1,
+           "maxItems": 8,
+           "type": "array",
+           "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+           }
+          }
+         },
+         "required": [
+          "tipo",
+          "voci"
+         ]
+        },
+        {
+         "type": "object",
+         "properties": {
+          "tipo": {
+           "type": "string",
+           "const": "programma"
+          },
+          "titolo": {
+           "type": "string",
+           "maxLength": 120
+          },
+          "righe": {
+           "minItems": 1,
+           "maxItems": 30,
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "quando": {
+              "type": "string",
+              "maxLength": 40
+             },
+             "cosa": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+             }
+            },
+            "required": [
+             "cosa"
+            ]
+           }
+          }
+         },
+         "required": [
+          "tipo",
+          "righe"
+         ]
+        },
+        {
+         "type": "object",
+         "properties": {
+          "tipo": {
+           "type": "string",
+           "const": "galleria"
+          },
+          "titolo": {
+           "type": "string",
+           "maxLength": 120
+          },
+          "immagini": {
+           "minItems": 1,
+           "maxItems": 10,
+           "type": "array",
+           "items": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+           }
+          }
+         },
+         "required": [
+          "tipo",
+          "immagini"
+         ]
+        },
+        {
+         "type": "object",
+         "properties": {
+          "tipo": {
+           "type": "string",
+           "const": "faq"
+          },
+          "titolo": {
+           "type": "string",
+           "maxLength": 120
+          },
+          "domande": {
+           "minItems": 1,
+           "maxItems": 12,
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "domanda": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+             },
+             "risposta": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+             }
+            },
+            "required": [
+             "domanda",
+             "risposta"
+            ]
+           }
+          }
+         },
+         "required": [
+          "tipo",
+          "domande"
+         ]
+        },
+        {
+         "type": "object",
+         "properties": {
+          "tipo": {
+           "type": "string",
+           "const": "prenota"
+          },
+          "titolo": {
+           "type": "string",
+           "maxLength": 120
+          },
+          "testo": {
+           "type": "string",
+           "maxLength": 500
+          }
+         },
+         "required": [
+          "tipo"
+         ]
+        }
+       ]
+      },
+      "description": "blocchi in ordine; la copertina in cima fa da titolo della pagina"
+     },
+     "accento": {
+      "description": "colore d'accento solo per questo evento, #rrggbb scuro (testo bianco leggibile); di solito si omette",
+      "type": "string"
+     }
+    },
+    "required": [
+     "evento_id",
+     "blocchi"
+    ]
+   },
+   "annotations": {
+    "title": "Scrivi la pagina dell'evento",
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
     "openWorldHint": false
    }
   },

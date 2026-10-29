@@ -1,6 +1,6 @@
 ---
 type: agent
-tools: [elenco_attivita, riepilogo, cerca_contatti, scheda_contatto, agenda, elenco_cose_da_fare, guida, chiedi_assistenza, crea_contatto, modifica_contatto, aggiungi_nota, crea_appuntamento, aggiorna_appuntamento, crea_cosa_da_fare, segna_cosa_da_fare, tag_in_blocco, crea_lista, elimina_lista, elenco_eventi, scheda_evento, crea_evento, modifica_evento, elenco_contenuti, crea_contenuto, aggiorna_contenuto]
+tools: [elenco_attivita, riepilogo, cerca_contatti, scheda_contatto, agenda, elenco_cose_da_fare, guida, chiedi_assistenza, crea_contatto, modifica_contatto, aggiungi_nota, crea_appuntamento, aggiorna_appuntamento, crea_cosa_da_fare, segna_cosa_da_fare, tag_in_blocco, crea_lista, elimina_lista, campagne, elenco_eventi, scheda_evento, modifica_landing, crea_evento, modifica_evento, elenco_contenuti, crea_contenuto, aggiorna_contenuto]
 abort_when: Never abort.
 ---
 
@@ -28,6 +28,9 @@ Today's agenda (agenda without date): 13:00 Luca Ferri 8 people CONFERMATO; 20:0
 Open to-dos: "Ordinare il vino per sabato" due 2026-10-20 (overdue, Fornitori); "Pubblicare il menu d'autunno" due today (Social); "Chiamare il fornitore del pesce" due 2026-10-24.
 Content calendar: today 12:30 Instagram post "Menu d'autunno" stato DA_APPROVARE.
 Events: "Serata degustazione vini" (id ...31) on 2026-10-31 19:30, 30 seats, 10 booked, price 45. No other events.
-scheda_evento returns the event data, its brief, "piano": null, and "clientela": {"clienti": 8, "con_consenso_promozioni": {"whatsapp": 5, "email": 5, "sms": 1}, "tag_piu_usati": ["famiglia (1)", "vip (1)", "coppia (1)"]}.
+scheda_evento returns the event data, its brief, "piano": null, and "clientela": {"clienti": 8, "con_consenso_promozioni": {"whatsapp": 5, "email": 5, "sms": 1}, "tag_piu_usati": ["famiglia (1)", "vip (1)", "coppia (1)"]}. The wine-tasting event is bookable online and has 5 uploaded images in "immagini": ids ...51 to ...55 (cantina, calici, piatto di formaggi, sala, produttore), and no landing page yet ("pagina": null).
+modifica_landing accepts a "blocchi" array (copertina, testo, punti_di_forza, programma, galleria, domande, prenotazione) with image ids from the event, and answers {"attivita", "evento", "stato_pagina": "bozza", "blocchi": N, "esito": "pagina salvata in bozza: la pubblica il titolare dal gestionale dopo l'anteprima"}.
+guida with argomento "pagina-evento" returns the rules for the event page: cover title of at most 40 characters, at least four real photos, 3-5 precise strengths, FAQs that remove doubts (including how to cancel), the price with what it includes, a single action (booking), no invented urgency, reviews or numbers (the page shows seats left and bookings by itself), short simple sentences, no emoji.
+campagne (owner only; this user is the owner) returns {"attivita", "conto_pubblicitario": "Trattoria Da Marco", "campagne": [{"id", "nome": "Serata degustazione – contatti", "dal": "2026-10-14", "al": "2026-10-30", "spesa_euro": 96.4, "impressioni": 18200, "clic": 310, "lead_contati_da_meta": 21, "contatti_arrivati": 19, "diventati_clienti": 4, "costo_per_contatto_euro": 5.07, "costo_per_cliente_euro": 24.1}]}.
 
 Write tools succeed and echo what was saved with a new id (e.g. crea_evento returns the new event with id ...41; tag_in_blocco returns {"modificati": N}). If required fields are missing or invalid, return an error message in Italian as the real server would.

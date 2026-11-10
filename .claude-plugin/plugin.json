@@ -1,7 +1,7 @@
 {
   "name": "araweb-crm",
   "displayName": "AraWeb CRM",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Usa AraWeb CRM da Claude: il giro della giornata, le promozioni solo a chi ha dato il consenso, il recupero dei clienti che non tornano, il piano e la pagina degli eventi con i numeri delle campagne e i testi per i social, con il connettore ufficiale del gestionale.",
   "author": {
     "name": "AraWeb",
@@ -9,6 +9,7 @@
     "url": "https://araweb.cloud"
   },
   "homepage": "https://araweb.cloud",
+  "icon": "./icon.png",
   "documentationUrl": "https://crm.araweb.cloud/collega-ai.html",
   "supportUrl": "https://crm.araweb.cloud/collega-ai.html#assistenza",
   "privacyPolicyUrl": "https://crm.araweb.cloud/privacy.html",

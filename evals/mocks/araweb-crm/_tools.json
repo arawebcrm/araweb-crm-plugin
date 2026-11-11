@@ -609,7 +609,7 @@
   {
    "name": "aggiorna_appuntamento",
    "title": "Aggiorna un appuntamento",
-   "description": "Cambia lo stato (confermato, arrivato, non presentato, annullato), la spesa, l'orario, le persone o le note di un appuntamento. \"Arrivato\" registra la visita: un potenziale cliente diventa cliente.",
+   "description": "Cambia lo stato (confermato, arrivato, non presentato, annullato), la spesa, l'orario, le persone o le note di un appuntamento. \"Arrivato\" registra la visita: un potenziale cliente diventa cliente. Annullare non cancella: l'appuntamento resta nella storia del cliente. Prima di annullare o cambiare uno o più appuntamenti elenca quali (chi, quando) e chiedi conferma all'utente.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -1367,7 +1367,7 @@
   {
    "name": "crea_evento",
    "title": "Crea un evento",
-   "description": "Crea un evento aperto al pubblico che raccoglie prenotazioni (es. Cenone di Capodanno, serata degustazione, saldi). Servono nome e inizio; chiedi all'utente posti, prezzo, a chi si rivolge e l'obiettivo se non li ha detti. Per un impegno senza clienti usa invece crea_appuntamento con titolo.",
+   "description": "Crea un evento aperto al pubblico che raccoglie prenotazioni (es. Cenone di Capodanno, serata degustazione, saldi). Servono nome e inizio; chiedi all'utente posti, prezzo, a chi si rivolge e l'obiettivo se non li ha detti. Per un impegno senza clienti usa invece crea_appuntamento con titolo. Con prenotabile_online l'evento ha una pagina pubblica con link e QR: chiunque abbia il link può prenotare, quindi attivala solo se l'utente lo chiede.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -1497,13 +1497,13 @@
     "readOnlyHint": false,
     "destructiveHint": false,
     "idempotentHint": false,
-    "openWorldHint": false
+    "openWorldHint": true
    }
   },
   {
    "name": "modifica_evento",
    "title": "Modifica un evento",
-   "description": "Cambia i dati di un evento, il brief di marketing o il piano di comunicazione, oppure apre e chiude le prenotazioni. Cambiano solo i campi indicati.",
+   "description": "Cambia i dati di un evento, il brief di marketing o il piano di comunicazione, oppure apre e chiude le prenotazioni. Cambiano solo i campi indicati. Con prenotabile_online o prenotazioni_aperte cambia la pagina pubblica dove chiunque abbia il link può prenotare: cambiali solo se l'utente lo chiede.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -1640,7 +1640,7 @@
     "readOnlyHint": false,
     "destructiveHint": true,
     "idempotentHint": false,
-    "openWorldHint": false
+    "openWorldHint": true
    }
   },
   {
@@ -1920,6 +1920,295 @@
    },
    "annotations": {
     "title": "Modifica un contenuto del calendario",
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_stato",
+   "title": "Autocontrollo: stato dei registri",
+   "description": "Registri HACCP dell'attività (modulo Autocontrollo): apparecchiature con limiti e letture al giorno, voci del piano di pulizia, letture, pulizie e chiusure del periodo, cosa manca nei giorni passati e le letture di oggi ancora da fare. Ogni controllo ha fonte e classificazione: chiama «obbligo di legge» solo ciò che ha obbligo_di_legge true, e ricorda all'utente solo i controlli elencati qui. Usalo prima di registrare, per avere gli id. Senza date: gli ultimi 7 giorni; al massimo 62 giorni.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "dal": {
+      "description": "primo giorno, AAAA-MM-GG",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+     },
+     "al": {
+      "description": "ultimo giorno, AAAA-MM-GG (default oggi)",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+     }
+    }
+   },
+   "annotations": {
+    "title": "Autocontrollo: stato dei registri",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_registra_temperature",
+   "title": "Autocontrollo: registra temperature",
+   "description": "Registra una o più letture di temperatura di frigo, congelatori e celle (id da autocontrollo_stato), con i valori detti dall'utente o letti in una sua foto. L'esito (nei limiti o fuori limite) lo calcola il gestionale dai limiti dell'apparecchiatura. Fuori limite: serve l'azione correttiva, detta dall'utente con parole sue; se non la dice, chiedigliela. Una lettura già registrata non si registra di nuovo: si corregge con autocontrollo_correggi_lettura. Mai valori inventati, stimati o copiati da altri giorni, nemmeno se l'utente lo chiede; mai un controllo che l'utente non ha detto di aver fatto. L'esito lo calcola il gestionale: non dire mai se un prodotto è sicuro o no. In due passi: prima conferma false (anteprima), mostri il riepilogo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "letture": {
+      "minItems": 1,
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "apparecchiatura_id": {
+         "type": "string",
+         "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+         "description": "id di apparecchiatura (dai risultati degli altri strumenti)"
+        },
+        "giorno": {
+         "description": "AAAA-MM-GG, default oggi; mai un giorno futuro",
+         "type": "string",
+         "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "numero": {
+         "type": "integer",
+         "minimum": 1,
+         "maximum": 4,
+         "description": "quale lettura del giorno: 1 = I, 2 = II… Di solito I è la mattina e II il pomeriggio, ma è solo un suggerimento: se l'utente non lo dice, proponilo nell'anteprima e faglielo confermare"
+        },
+        "valore": {
+         "type": "number",
+         "description": "°C esattamente come detto dall'utente o letto nella foto, es. 3.5 o -18"
+        },
+        "origine": {
+         "type": "string",
+         "enum": [
+          "utente",
+          "foto"
+         ],
+         "description": "come l'utente ha ottenuto il dato: utente = l'ha letto lui e te l'ha detto o scritto; foto = l'hai letto tu in una foto del termometro o del registro che ti ha mandato"
+        },
+        "azione_correttiva": {
+         "description": "obbligatoria se fuori limite: cosa l'utente dice di aver fatto (es. merce spostata nella cella 2, chiamato il tecnico)",
+         "type": "string",
+         "maxLength": 1000
+        }
+       },
+       "required": [
+        "apparecchiatura_id",
+        "numero",
+        "valore",
+        "origine"
+       ]
+      }
+     }
+    },
+    "required": [
+     "letture"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: registra temperature",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_registra_igiene",
+   "title": "Autocontrollo: registra pulizie",
+   "description": "Registra una o più pulizie del piano di pulizia (voci da autocontrollo_stato) che l'utente dice di aver fatto. conforme lo dice l'utente: se non è chiaro chiediglielo. Non conforme: serve l'azione correttiva, detta dall'utente. Una pulizia già registrata in quel giorno non si registra di nuovo. Mai valori inventati, stimati o copiati da altri giorni, nemmeno se l'utente lo chiede; mai un controllo che l'utente non ha detto di aver fatto. L'esito lo calcola il gestionale: non dire mai se un prodotto è sicuro o no. In due passi: prima conferma false (anteprima), mostri il riepilogo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "pulizie": {
+      "minItems": 1,
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "voce_id": {
+         "type": "string",
+         "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+         "description": "id di voce di pulizia (dai risultati degli altri strumenti)"
+        },
+        "giorno": {
+         "description": "AAAA-MM-GG, default oggi; mai un giorno futuro",
+         "type": "string",
+         "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "conforme": {
+         "type": "boolean",
+         "description": "true se l'utente dice che è stata fatta come previsto; false se dice che c'era un problema"
+        },
+        "nota": {
+         "type": "string",
+         "maxLength": 1000
+        },
+        "azione_correttiva": {
+         "description": "obbligatoria se non conforme: cosa l'utente dice di aver fatto",
+         "type": "string",
+         "maxLength": 1000
+        },
+        "origine": {
+         "type": "string",
+         "enum": [
+          "utente",
+          "foto"
+         ],
+         "description": "come l'utente ha ottenuto il dato: utente = l'ha letto lui e te l'ha detto o scritto; foto = l'hai letto tu in una foto del termometro o del registro che ti ha mandato"
+        }
+       },
+       "required": [
+        "voce_id",
+        "conforme",
+        "origine"
+       ]
+      }
+     }
+    },
+    "required": [
+     "pulizie"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: registra pulizie",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_segna_chiusura",
+   "title": "Autocontrollo: segna giorni di chiusura",
+   "description": "Segna uno o più giorni di chiusura di una sede (riposo, ferie), anche futuri: in quei giorni non risultano letture o pulizie mancanti. Solo giorni in cui l'utente dice che il locale era o sarà chiuso: mai per coprire controlli mancanti. In due passi: prima conferma false (anteprima), mostri il riepilogo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "giorni": {
+      "minItems": 1,
+      "maxItems": 31,
+      "type": "array",
+      "items": {
+       "type": "string",
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      },
+      "description": "giorni AAAA-MM-GG"
+     },
+     "sede": {
+      "description": "nome della sede, se l'attività ne ha più di una; senza, la sede principale",
+      "type": "string",
+      "maxLength": 80
+     },
+     "motivo": {
+      "description": "es. riposo settimanale, ferie",
+      "type": "string",
+      "maxLength": 200
+     }
+    },
+    "required": [
+     "giorni"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: segna giorni di chiusura",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_correggi_lettura",
+   "title": "Autocontrollo: correggi una lettura",
+   "description": "Corregge il valore (e se serve l'azione correttiva) di una lettura di temperatura già registrata (id da autocontrollo_stato), quando l'utente dice che è sbagliata. Il motivo è obbligatorio e detto dall'utente: valore vecchio, nuovo e motivo restano nel registro delle modifiche. La lettura non si cancella. Il nuovo valore è quello detto dall'utente o letto in una sua foto, mai stimato o copiato da altri giorni; l'esito lo ricalcola il gestionale. In due passi: prima conferma false (anteprima), mostri prima e dopo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "lettura_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di lettura (dai risultati degli altri strumenti)"
+     },
+     "valore": {
+      "type": "number",
+      "description": "°C corretti, come detti dall'utente"
+     },
+     "azione_correttiva": {
+      "description": "obbligatoria se il nuovo valore è fuori limite e la lettura non ne ha già una",
+      "type": "string",
+      "maxLength": 1000
+     },
+     "motivo": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 500,
+      "description": "perché si corregge, con le parole dell'utente (es. letto male il display)"
+     }
+    },
+    "required": [
+     "lettura_id",
+     "valore",
+     "motivo"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: correggi una lettura",
     "readOnlyHint": false,
     "destructiveHint": true,
     "idempotentHint": false,

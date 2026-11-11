@@ -9,7 +9,7 @@ Plugin ufficiale di [AraWeb CRM](https://crm.araweb.cloud), il gestionale dei cl
 - **Skill `promozioni`**: dal «prepara gli auguri per chi compie gli anni a novembre» al testo pronto, scegliendo i destinatari solo tra chi ha dato il consenso per quel canale, con mittente e modo di disiscriversi nel testo e un tag per ricordare chi l'ha ricevuto.
 - **Skill `piano-evento`**: dalla scheda di un evento (Cenone di Capodanno, serata degustazione, saldi) al piano di comunicazione salvato nel gestionale: tempi di preparazione, controlli sulle prenotazioni con il rimedio se vanno piano, il grazie dopo l'evento, le cose da fare, i contenuti in bozza nel calendario editoriale e la pagina pubblica dell'evento scritta in bozza (la pubblichi tu), con i numeri delle campagne Facebook e Instagram per capire se rendono.
 - **Skill `recupero-clienti`**: due o tre messaggi distanziati per far tornare i clienti abituali che non si vedono da un po', solo a chi ha il consenso, con un tag e una lista per vedere chi è tornato.
-- **Skill `autocontrollo`**: per chi ha il modulo Autocontrollo, registra le temperature di frigo e congelatori, le pulizie e i giorni di chiusura che l'utente detta o fotografa, sempre in due passi (anteprima, poi il tuo sì), e dice cosa manca nei registri. Non inventa mai un valore e non dice mai se un alimento è sicuro.
+- **Skill `autocontrollo`**: per chi ha il modulo Autocontrollo, registra le temperature di frigo e congelatori, le pulizie, i giorni di chiusura, la merce ricevuta (bolla o fattura del fornitore, anche in foto, con lotti e temperatura all'arrivo) e gli imballaggi MOCA che l'utente detta o fotografa, sempre in due passi (anteprima, poi il tuo sì), e dice cosa manca nei registri. Fornitori e prodotti nuovi li propone, non li crea in silenzio. Non inventa mai un valore, un lotto o un motivo e non dice mai se un alimento è sicuro.
 - **Skill `formati-canali`**: come si scrivono post Instagram, storie, reel, newsletter, WhatsApp, post su Google e volantini per un'attività locale, e come metterli nel calendario editoriale.
 
 ## Come si usa
@@ -17,13 +17,13 @@ Plugin ufficiale di [AraWeb CRM](https://crm.araweb.cloud), il gestionale dei cl
 1. Aggiungi il plugin da **Personalizza → Plugin** in Claude.
 2. Nella scheda **Connettori** del plugin collega AraWeb CRM: entra con la tua email e password del gestionale e premi **Consenti**.
 3. Il titolare dell'attività deve aver acceso l'assistente AI una volta, da **Impostazioni → Assistente AI** nel gestionale.
-4. Chiedi per esempio: «com'è la giornata?», «prepara un WhatsApp per i clienti che non vengono da tre mesi», «organizziamo il Cenone di Capodanno, 80 posti a 90 euro», «scrivimi il post per la serata di venerdì», «segna le temperature di stamattina: frigo 3 gradi, congelatore -19».
+4. Chiedi per esempio: «com'è la giornata?», «prepara un WhatsApp per i clienti che non vengono da tre mesi», «organizziamo il Cenone di Capodanno, 80 posti a 90 euro», «scrivimi il post per la serata di venerdì», «segna le temperature di stamattina: frigo 3 gradi, congelatore -19», «ho ricevuto 10 kg di lonza da Carni Rossi, bolla 123, lotto L77».
 
 Istruzioni complete: [crm.araweb.cloud/collega-ai.html](https://crm.araweb.cloud/collega-ai.html).
 
 ## Dati
 
-Il plugin è fatto solo di istruzioni in testo: non esegue programmi e non salva nulla. I dati passano soltanto tra Claude e il tuo account AraWeb CRM, tramite il connettore `crm.araweb.cloud/mcp`, con accesso OAuth. Il gestionale non manda messaggi ai clienti: Claude prepara i testi e li invii tu. Allergie, dati sulla salute e consensi non sono mai letti né modificati tramite AI. I registri dell'Autocontrollo contengono solo i valori che dici tu o che si leggono in una tua foto, con l'indicazione di chi li ha inseriti. Ogni operazione resta nel registro del gestionale con l'indicazione «via AI». [Privacy policy](https://crm.araweb.cloud/privacy.html).
+Il plugin è fatto solo di istruzioni in testo: non esegue programmi e non salva nulla. I dati passano soltanto tra Claude e il tuo account AraWeb CRM, tramite il connettore `crm.araweb.cloud/mcp`, con accesso OAuth. Il gestionale non manda messaggi ai clienti: Claude prepara i testi e li invii tu. Allergie, dati sulla salute e consensi non sono mai letti né modificati tramite AI. I registri dell'Autocontrollo contengono solo i valori (anche i lotti) che dici tu o che si leggono in una tua foto, con l'indicazione di chi li ha inseriti. Ogni operazione resta nel registro del gestionale con l'indicazione «via AI». [Privacy policy](https://crm.araweb.cloud/privacy.html).
 
 ## Assistenza
 

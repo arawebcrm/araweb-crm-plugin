@@ -9,6 +9,7 @@
     "url": "https://araweb.cloud"
   },
   "homepage": "https://araweb.cloud",
+  "icon": "./icon.png",
   "documentationUrl": "https://crm.araweb.cloud/collega-ai.html",
   "supportUrl": "https://crm.araweb.cloud/collega-ai.html#assistenza",
   "privacyPolicyUrl": "https://crm.araweb.cloud/privacy.html",

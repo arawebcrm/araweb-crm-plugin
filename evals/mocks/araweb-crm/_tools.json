@@ -41,7 +41,7 @@
   {
    "name": "cerca_contatti",
    "title": "Cerca contatti",
-   "description": "Cerca clienti e potenziali clienti con gli stessi filtri della lista Contatti. Massimo 50 per pagina. Usalo anche prima di creare un contatto o un appuntamento, per non fare doppioni.",
+   "description": "Cerca clienti e potenziali clienti con gli stessi filtri della lista Contatti; con testo trova anche i referenti di un'azienda (per nome o partita IVA dell'azienda). Massimo 50 per pagina. Usalo anche prima di creare un contatto o un appuntamento, per non fare doppioni.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -51,7 +51,7 @@
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
      },
      "testo": {
-      "description": "nome, cognome, email o parte del telefono",
+      "description": "nome, cognome, email, parte del telefono, oppure nome o partita IVA della sua azienda",
       "type": "string",
       "maxLength": 100
      },
@@ -143,7 +143,7 @@
   {
    "name": "scheda_contatto",
    "title": "Scheda di un contatto",
-   "description": "Dati di un contatto: recapiti, tag, note, consensi alle promozioni, visite e spesa, frequenza di ritorno, ultimi appuntamenti e ultime note. Le allergie non sono mai disponibili tramite AI.",
+   "description": "Dati di un contatto: recapiti, azienda per cui prenota (con i dati per la fattura), tag, note, consensi alle promozioni, visite e spesa, frequenza di ritorno, ultimi appuntamenti e ultime note. Le allergie non sono mai disponibili tramite AI.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -609,7 +609,7 @@
   {
    "name": "aggiorna_appuntamento",
    "title": "Aggiorna un appuntamento",
-   "description": "Cambia lo stato (confermato, arrivato, non presentato, annullato), la spesa, l'orario, le persone o le note di un appuntamento. \"Arrivato\" registra la visita: un potenziale cliente diventa cliente.",
+   "description": "Cambia lo stato (confermato, arrivato, non presentato, annullato), la spesa, l'orario, le persone o le note di un appuntamento. \"Arrivato\" registra la visita: un potenziale cliente diventa cliente. Annullare non cancella: l'appuntamento resta nella storia del cliente. Prima di annullare o cambiare uno o più appuntamenti elenca quali (chi, quando) e chiedi conferma all'utente.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -819,7 +819,7 @@
       }
      },
      "testo": {
-      "description": "nome, cognome, email o parte del telefono",
+      "description": "nome, cognome, email, parte del telefono, oppure nome o partita IVA della sua azienda",
       "type": "string",
       "maxLength": 100
      },
@@ -924,7 +924,7 @@
       "maxLength": 60
      },
      "testo": {
-      "description": "nome, cognome, email o parte del telefono",
+      "description": "nome, cognome, email, parte del telefono, oppure nome o partita IVA della sua azienda",
       "type": "string",
       "maxLength": 100
      },
@@ -1367,7 +1367,7 @@
   {
    "name": "crea_evento",
    "title": "Crea un evento",
-   "description": "Crea un evento aperto al pubblico che raccoglie prenotazioni (es. Cenone di Capodanno, serata degustazione, saldi). Servono nome e inizio; chiedi all'utente posti, prezzo, a chi si rivolge e l'obiettivo se non li ha detti. Per un impegno senza clienti usa invece crea_appuntamento con titolo.",
+   "description": "Crea un evento aperto al pubblico che raccoglie prenotazioni (es. Cenone di Capodanno, serata degustazione, saldi). Servono nome e inizio; chiedi all'utente posti, prezzo, a chi si rivolge e l'obiettivo se non li ha detti. Per un impegno senza clienti usa invece crea_appuntamento con titolo. Con prenotabile_online l'evento ha una pagina pubblica con link e QR: chiunque abbia il link può prenotare, quindi attivala solo se l'utente lo chiede.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -1497,13 +1497,13 @@
     "readOnlyHint": false,
     "destructiveHint": false,
     "idempotentHint": false,
-    "openWorldHint": false
+    "openWorldHint": true
    }
   },
   {
    "name": "modifica_evento",
    "title": "Modifica un evento",
-   "description": "Cambia i dati di un evento, il brief di marketing o il piano di comunicazione, oppure apre e chiude le prenotazioni. Cambiano solo i campi indicati.",
+   "description": "Cambia i dati di un evento, il brief di marketing o il piano di comunicazione, oppure apre e chiude le prenotazioni. Cambiano solo i campi indicati. Con prenotabile_online o prenotazioni_aperte cambia la pagina pubblica dove chiunque abbia il link può prenotare: cambiali solo se l'utente lo chiede.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -1640,7 +1640,7 @@
     "readOnlyHint": false,
     "destructiveHint": true,
     "idempotentHint": false,
-    "openWorldHint": false
+    "openWorldHint": true
    }
   },
   {
@@ -1920,6 +1920,778 @@
    },
    "annotations": {
     "title": "Modifica un contenuto del calendario",
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_stato",
+   "title": "Autocontrollo: stato dei registri",
+   "description": "Registri HACCP dell'attività (modulo Autocontrollo): apparecchiature con limiti e letture al giorno, voci del piano di pulizia, letture, pulizie e chiusure del periodo, la merce ricevuta nel periodo (documenti con gli id delle righe, che servono per correggerle) e le righe non conformi del mese, cosa manca nei giorni passati e le letture di oggi ancora da fare. Ogni controllo ha fonte e classificazione: chiama «obbligo di legge» solo ciò che ha obbligo_di_legge true, e ricorda all'utente solo i controlli elencati qui. Usalo prima di registrare, per avere gli id. Senza date: gli ultimi 7 giorni; al massimo 62 giorni.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "dal": {
+      "description": "primo giorno, AAAA-MM-GG",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+     },
+     "al": {
+      "description": "ultimo giorno, AAAA-MM-GG (default oggi)",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+     }
+    }
+   },
+   "annotations": {
+    "title": "Autocontrollo: stato dei registri",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_registra_temperature",
+   "title": "Autocontrollo: registra temperature",
+   "description": "Registra una o più letture di temperatura di frigo, congelatori e celle (id da autocontrollo_stato), con i valori detti dall'utente o letti in una sua foto. L'esito (nei limiti o fuori limite) lo calcola il gestionale dai limiti dell'apparecchiatura. Fuori limite: serve l'azione correttiva, detta dall'utente con parole sue; se non la dice, chiedigliela. Una lettura già registrata non si registra di nuovo: si corregge con autocontrollo_correggi_lettura. Mai valori inventati, stimati o copiati da altri giorni, nemmeno se l'utente lo chiede; mai un controllo che l'utente non ha detto di aver fatto. L'esito lo calcola il gestionale: non dire mai se un prodotto è sicuro o no. In due passi: prima conferma false (anteprima), mostri il riepilogo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "letture": {
+      "minItems": 1,
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "apparecchiatura_id": {
+         "type": "string",
+         "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+         "description": "id di apparecchiatura (dai risultati degli altri strumenti)"
+        },
+        "giorno": {
+         "description": "AAAA-MM-GG, default oggi; mai un giorno futuro",
+         "type": "string",
+         "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "numero": {
+         "type": "integer",
+         "minimum": 1,
+         "maximum": 4,
+         "description": "quale lettura del giorno: 1 = I, 2 = II… Di solito I è la mattina e II il pomeriggio, ma è solo un suggerimento: se l'utente non lo dice, proponilo nell'anteprima e faglielo confermare"
+        },
+        "valore": {
+         "type": "number",
+         "description": "°C esattamente come detto dall'utente o letto nella foto, es. 3.5 o -18"
+        },
+        "origine": {
+         "type": "string",
+         "enum": [
+          "utente",
+          "foto"
+         ],
+         "description": "come l'utente ha ottenuto il dato: utente = l'ha letto lui e te l'ha detto o scritto; foto = l'hai letto tu in una foto del termometro o del registro che ti ha mandato"
+        },
+        "azione_correttiva": {
+         "description": "obbligatoria se fuori limite: cosa l'utente dice di aver fatto (es. merce spostata nella cella 2, chiamato il tecnico)",
+         "type": "string",
+         "maxLength": 1000
+        }
+       },
+       "required": [
+        "apparecchiatura_id",
+        "numero",
+        "valore",
+        "origine"
+       ]
+      }
+     }
+    },
+    "required": [
+     "letture"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: registra temperature",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_registra_igiene",
+   "title": "Autocontrollo: registra pulizie",
+   "description": "Registra una o più pulizie del piano di pulizia (voci da autocontrollo_stato) che l'utente dice di aver fatto. conforme lo dice l'utente: se non è chiaro chiediglielo. Non conforme: serve l'azione correttiva, detta dall'utente. Una pulizia già registrata in quel giorno non si registra di nuovo. Mai valori inventati, stimati o copiati da altri giorni, nemmeno se l'utente lo chiede; mai un controllo che l'utente non ha detto di aver fatto. L'esito lo calcola il gestionale: non dire mai se un prodotto è sicuro o no. In due passi: prima conferma false (anteprima), mostri il riepilogo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "pulizie": {
+      "minItems": 1,
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "voce_id": {
+         "type": "string",
+         "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+         "description": "id di voce di pulizia (dai risultati degli altri strumenti)"
+        },
+        "giorno": {
+         "description": "AAAA-MM-GG, default oggi; mai un giorno futuro",
+         "type": "string",
+         "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "conforme": {
+         "type": "boolean",
+         "description": "true se l'utente dice che è stata fatta come previsto; false se dice che c'era un problema"
+        },
+        "nota": {
+         "type": "string",
+         "maxLength": 1000
+        },
+        "azione_correttiva": {
+         "description": "obbligatoria se non conforme: cosa l'utente dice di aver fatto",
+         "type": "string",
+         "maxLength": 1000
+        },
+        "origine": {
+         "type": "string",
+         "enum": [
+          "utente",
+          "foto"
+         ],
+         "description": "come l'utente ha ottenuto il dato: utente = l'ha letto lui e te l'ha detto o scritto; foto = l'hai letto tu in una foto del termometro o del registro che ti ha mandato"
+        }
+       },
+       "required": [
+        "voce_id",
+        "conforme",
+        "origine"
+       ]
+      }
+     }
+    },
+    "required": [
+     "pulizie"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: registra pulizie",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_segna_chiusura",
+   "title": "Autocontrollo: segna giorni di chiusura",
+   "description": "Segna uno o più giorni di chiusura di una sede (riposo, ferie), anche futuri: in quei giorni non risultano letture o pulizie mancanti. Solo giorni in cui l'utente dice che il locale era o sarà chiuso: mai per coprire controlli mancanti. In due passi: prima conferma false (anteprima), mostri il riepilogo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "giorni": {
+      "minItems": 1,
+      "maxItems": 31,
+      "type": "array",
+      "items": {
+       "type": "string",
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      },
+      "description": "giorni AAAA-MM-GG"
+     },
+     "sede": {
+      "description": "nome della sede, se l'attività ne ha più di una; senza, la sede principale",
+      "type": "string",
+      "maxLength": 80
+     },
+     "motivo": {
+      "description": "es. riposo settimanale, ferie",
+      "type": "string",
+      "maxLength": 200
+     }
+    },
+    "required": [
+     "giorni"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: segna giorni di chiusura",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_correggi_lettura",
+   "title": "Autocontrollo: correggi una lettura",
+   "description": "Corregge il valore (e se serve l'azione correttiva) di una lettura di temperatura già registrata (id da autocontrollo_stato), quando l'utente dice che è sbagliata. Il motivo è obbligatorio e detto dall'utente: valore vecchio, nuovo e motivo restano nel registro delle modifiche. La lettura non si cancella. Il nuovo valore è quello detto dall'utente o letto in una sua foto, mai stimato o copiato da altri giorni; l'esito lo ricalcola il gestionale. In due passi: prima conferma false (anteprima), mostri prima e dopo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "lettura_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di lettura (dai risultati degli altri strumenti)"
+     },
+     "valore": {
+      "type": "number",
+      "description": "°C corretti, come detti dall'utente"
+     },
+     "azione_correttiva": {
+      "description": "obbligatoria se il nuovo valore è fuori limite e la lettura non ne ha già una",
+      "type": "string",
+      "maxLength": 1000
+     },
+     "motivo": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 500,
+      "description": "perché si corregge, con le parole dell'utente (es. letto male il display)"
+     }
+    },
+    "required": [
+     "lettura_id",
+     "valore",
+     "motivo"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: correggi una lettura",
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_elenco_fornitori",
+   "title": "Autocontrollo: fornitori",
+   "description": "Fornitori della merce dell'attività (modulo Autocontrollo), con id, partita IVA e contatto. Usalo prima di registrare un ricevimento o di creare un fornitore, per non farne un doppione. Senza anche_disattivati solo quelli attivi.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "testo": {
+      "description": "parte del nome o della partita IVA",
+      "type": "string",
+      "maxLength": 100
+     },
+     "anche_disattivati": {
+      "type": "boolean"
+     }
+    }
+   },
+   "annotations": {
+    "title": "Autocontrollo: fornitori",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_cerca_ingredienti",
+   "title": "Autocontrollo: prodotti acquistati",
+   "description": "Prodotti che l'attività riceve dai fornitori (modulo Autocontrollo), con id e unità. Usalo prima di registrare un ricevimento o di creare un prodotto, per non farne un doppione. Senza anche_disattivati solo quelli attivi.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "testo": {
+      "description": "parte del nome",
+      "type": "string",
+      "maxLength": 100
+     },
+     "anche_disattivati": {
+      "type": "boolean"
+     }
+    }
+   },
+   "annotations": {
+    "title": "Autocontrollo: prodotti acquistati",
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_crea_fornitore",
+   "title": "Autocontrollo: nuovo fornitore",
+   "description": "Aggiunge un fornitore della merce, solo se l'utente lo chiede o lo approva. Se esiste già con lo stesso nome (senza badare alle maiuscole) non lo crea e dà quello; se ce ne sono con nome simile li mostra nell'anteprima: chiedi all'utente se è uno di quelli. In due passi: prima conferma false (anteprima), mostri il riepilogo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "nome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+     },
+     "partita_iva": {
+      "type": "string",
+      "maxLength": 20
+     },
+     "contatto": {
+      "description": "telefono, email o referente",
+      "type": "string",
+      "maxLength": 200
+     },
+     "note": {
+      "type": "string",
+      "maxLength": 1000
+     }
+    },
+    "required": [
+     "nome"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: nuovo fornitore",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_crea_ingrediente",
+   "title": "Autocontrollo: nuovo prodotto",
+   "description": "Aggiunge un prodotto acquistato (carne, latticini, verdura, bevande…), solo se l'utente lo chiede o lo approva. Se esiste già con lo stesso nome (senza badare alle maiuscole) non lo crea e dà quello; se ce ne sono con nome simile li mostra nell'anteprima: chiedi all'utente se è uno di quelli. In due passi: prima conferma false (anteprima), mostri il riepilogo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "nome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+     },
+     "unita": {
+      "default": "pz",
+      "description": "unità di misura abituale, es. pz, kg, g, l, conf, cartoni",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20
+     }
+    },
+    "required": [
+     "nome"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: nuovo prodotto",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_registra_ricevimento",
+   "title": "Autocontrollo: registra merce ricevuta",
+   "description": "Registra un documento di merce ricevuta (DDT o fattura del fornitore) con le sue righe: prodotto, quantità, lotto del fornitore, scadenza, temperatura all'arrivo, esito. Fornitore e prodotti per nome o id (da autocontrollo_elenco_fornitori e autocontrollo_cerca_ingredienti): se non esistono qui non si creano, l'anteprima lo segnala e si propone all'utente autocontrollo_crea_fornitore o autocontrollo_crea_ingrediente. Il lotto del fornitore si scrive solo com'è sull'etichetta o sul documento: mai inventato, dedotto o copiato da un'altra riga. Se manca e l'attività usa il lotto interno, chiedilo all'utente (se dice che non c'è, senza_lotto true); se non lo usa, un lotto assente non va chiesto. Quello che va chiesto all'utente è in da_chiarire dell'anteprima, e finché resta qualcosa la conferma non scrive. Il lotto interno, se l'attività lo usa, lo assegna il gestionale alla conferma. L'esito lo dice l'utente; non conforme vuole il motivo, con le sue parole. Lo stesso documento non si registra due volte: si corregge riga per riga con autocontrollo_correggi_ricevimento. Mai dati inventati, stimati, dedotti o copiati da altri documenti, nemmeno se l'utente lo chiede: solo quelli che l'utente dice o che leggi in una sua foto. Non dire mai se un prodotto è sicuro o no. In due passi: prima conferma false (anteprima), mostri il riepilogo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "fornitore": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "nome o id del fornitore"
+     },
+     "numero": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "numero del DDT o della fattura, com'è scritto sul documento"
+     },
+     "data": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "data del documento, AAAA-MM-GG; mai futura"
+     },
+     "sede": {
+      "description": "nome della sede, se l'attività ne ha più di una; senza, la sede principale",
+      "type": "string",
+      "maxLength": 80
+     },
+     "note": {
+      "type": "string",
+      "maxLength": 1000
+     },
+     "origine": {
+      "type": "string",
+      "enum": [
+       "utente",
+       "foto"
+      ],
+      "description": "come l'utente ha ottenuto i dati: utente = te li ha detti o scritti lui; foto = li hai letti tu in una foto della bolla (DDT), della fattura o dell'etichetta che ti ha mandato"
+     },
+     "righe": {
+      "minItems": 1,
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "prodotto": {
+         "type": "string",
+         "minLength": 1,
+         "maxLength": 120,
+         "description": "nome o id del prodotto"
+        },
+        "quantita": {
+         "type": "number",
+         "exclusiveMinimum": 0,
+         "maximum": 999999999
+        },
+        "unita": {
+         "description": "es. kg, pz, conf; senza: l'unità del prodotto",
+         "type": "string",
+         "maxLength": 20
+        },
+        "lotto_fornitore": {
+         "description": "lotto scritto dal fornitore, esattamente come sull'etichetta o sul documento",
+         "type": "string",
+         "maxLength": 60
+        },
+        "senza_lotto": {
+         "description": "true solo se l'utente dice che per questa riga il lotto non c'è o non va registrato",
+         "type": "boolean"
+        },
+        "scadenza": {
+         "description": "AAAA-MM-GG, come sull'etichetta",
+         "type": "string",
+         "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "temperatura": {
+         "description": "°C all'arrivo, misurati dall'utente",
+         "type": "number"
+        },
+        "esito": {
+         "type": "string",
+         "enum": [
+          "ok",
+          "non_conforme"
+         ],
+         "description": "lo dice l'utente: ok oppure non_conforme"
+        },
+        "motivo_non_conforme": {
+         "description": "obbligatorio se non conforme: con le parole dell'utente (es. imballo rotto, temperatura alta, respinta)",
+         "type": "string",
+         "maxLength": 500
+        },
+        "note": {
+         "type": "string",
+         "maxLength": 500
+        }
+       },
+       "required": [
+        "prodotto",
+        "esito"
+       ]
+      }
+     }
+    },
+    "required": [
+     "fornitore",
+     "numero",
+     "data",
+     "origine",
+     "righe"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: registra merce ricevuta",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_registra_moca",
+   "title": "Autocontrollo: registra imballaggi (MOCA)",
+   "description": "Registra l'arrivo di una fornitura di imballaggi o materiali a contatto con gli alimenti (MOCA: vaschette, film, sacchetti, carta…). La fornitura precedente dello stesso imballaggio ancora in uso si chiude da sola con la data della nuova; l'anteprima dice quale. L'imballaggio si indica per nome o id: se non esiste, l'anteprima lo segnala e lo crea solo nuovo_imballaggio true, dopo che l'utente ha detto di crearlo. Mai dati inventati, stimati, dedotti o copiati da altri documenti, nemmeno se l'utente lo chiede: solo quelli che l'utente dice o che leggi in una sua foto. Non dire mai se un prodotto è sicuro o no. In due passi: prima conferma false (anteprima), mostri il riepilogo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "imballaggio": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "nome o id dell'imballaggio"
+     },
+     "nuovo_imballaggio": {
+      "description": "true solo se l'imballaggio non esiste ancora e l'utente, vista l'anteprima, ha detto di crearlo",
+      "type": "boolean"
+     },
+     "unita": {
+      "description": "solo per un imballaggio nuovo: pz, conf, cartoni…; default pz",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20
+     },
+     "data": {
+      "description": "giorno di arrivo della fornitura, AAAA-MM-GG, default oggi; mai futuro",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+     },
+     "quantita": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 999999999
+     },
+     "documento_id": {
+      "description": "documento con cui è arrivata, se l'utente lo indica (id da autocontrollo_stato, sezione ricevimento)",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "nota": {
+      "type": "string",
+      "maxLength": 1000
+     },
+     "origine": {
+      "type": "string",
+      "enum": [
+       "utente",
+       "foto"
+      ],
+      "description": "come l'utente ha ottenuto i dati: utente = te li ha detti o scritti lui; foto = li hai letti tu in una foto della bolla (DDT), della fattura o dell'etichetta che ti ha mandato"
+     }
+    },
+    "required": [
+     "imballaggio",
+     "quantita",
+     "origine"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: registra imballaggi (MOCA)",
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "autocontrollo_correggi_ricevimento",
+   "title": "Autocontrollo: correggi una riga di merce ricevuta",
+   "description": "Corregge una riga di merce già registrata (id da autocontrollo_stato, sezione ricevimento) quando l'utente dice che è sbagliata: quantità, unità, lotto del fornitore, scadenza, temperatura, esito, motivo della non conformità, note. Cambiano solo i campi indicati; null svuota un campo. Il motivo della correzione è obbligatorio e detto dall'utente: valori vecchi, nuovi e motivo restano nel registro delle modifiche. La riga non si cancella; prodotto, documento e lotto interno non si cambiano qui. I nuovi valori sono quelli detti dall'utente o letti in una sua foto, mai stimati né inventati (il lotto men che meno). In due passi: prima conferma false (anteprima), mostri prima e dopo, poi conferma true solo dopo un sì esplicito.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "attivita_id": {
+      "description": "id dell'attività commerciale (ristorante, negozio…) da elenco_attivita. Obbligatorio se l'utente ne ha più di una.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+     },
+     "conferma": {
+      "default": false,
+      "description": "false = anteprima: non scrive nulla e restituisce il riepilogo esatto. true solo dopo che l'utente ha visto l'anteprima e ha detto sì esplicitamente",
+      "type": "boolean"
+     },
+     "riga_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "id di riga di merce (dai risultati degli altri strumenti)"
+     },
+     "quantita": {
+      "anyOf": [
+       {
+        "type": "number",
+        "exclusiveMinimum": 0,
+        "maximum": 999999999
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "unita": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 20
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "lotto_fornitore": {
+      "description": "esattamente come sull'etichetta o sul documento",
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 60
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "scadenza": {
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "temperatura": {
+      "description": "°C all'arrivo",
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "esito": {
+      "type": "string",
+      "enum": [
+       "ok",
+       "non_conforme"
+      ]
+     },
+     "motivo_non_conforme": {
+      "description": "obbligatorio se l'esito diventa non conforme",
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 500
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "note": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 500
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "motivo": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 500,
+      "description": "perché si corregge, con le parole dell'utente (es. lotto letto male sull'etichetta)"
+     }
+    },
+    "required": [
+     "riga_id",
+     "motivo"
+    ]
+   },
+   "annotations": {
+    "title": "Autocontrollo: correggi una riga di merce ricevuta",
     "readOnlyHint": false,
     "destructiveHint": true,
     "idempotentHint": false,

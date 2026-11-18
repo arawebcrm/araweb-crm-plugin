@@ -1,6 +1,6 @@
 ---
 name: recupero-clienti
-description: Far tornare i clienti che non vengono da un po' con AraWeb CRM: chi è in ritardo rispetto al suo solito, chi manca da mesi, i clienti abituali persi di vista. Usala quando l'utente dice «i clienti non tornano», «chi non viene più», «ci mancano i clienti di una volta», vuole una campagna per riportarli, o chiede com'è andato un recupero già fatto.
+description: Far tornare i clienti che non vengono da un po' con AraWeb CRM, cioè chi è in ritardo rispetto al suo solito, chi manca da mesi, i clienti abituali persi di vista. Usala quando l'utente dice «i clienti non tornano», «chi non viene più», «ci mancano i clienti di una volta», vuole una campagna per riportarli, o chiede com'è andato un recupero già fatto.
 ---
 
 # Recupero dei clienti

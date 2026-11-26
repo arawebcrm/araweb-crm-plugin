@@ -206,7 +206,7 @@
   {
    "name": "elenco_cose_da_fare",
    "title": "Cose da fare",
-   "description": "Cose da fare non ancora completate (nel gestionale: pagina Attività), dalla scadenza più vicina.",
+   "description": "Cose da fare non ancora completate (nel gestionale: pagina Attività, per i consulenti Scadenze), dalla scadenza più vicina, con le persone a cui sono assegnate e ogni quanti mesi si ripetono. passi: quanti passi della checklist sono spuntati su quanti (es. «3/5»), solo per le scadenze che ne hanno.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -217,7 +217,7 @@
      },
      "solo_mie": {
       "default": false,
-      "description": "solo quelle assegnate all'utente",
+      "description": "solo quelle assegnate all'utente, anche insieme ad altri",
       "type": "boolean"
      },
      "evento_id": {
@@ -463,7 +463,7 @@
   {
    "name": "aggiungi_nota",
    "title": "Aggiungi una nota",
-   "description": "Aggiunge alla cronologia del contatto una nota, una telefonata, un messaggio o un incontro. Mai dati sulla salute.",
+   "description": "Con contatto_id aggiunge alla cronologia del contatto una nota, una telefonata, un messaggio o un incontro. Con azienda_id (al posto di contatto_id) aggiunge una nota datata al diario dell'azienda, con tag facoltativi. Mai dati sulla salute.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -475,7 +475,12 @@
      "contatto_id": {
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
-      "description": "id di contatto (dai risultati degli altri strumenti)"
+      "description": "cronologia del contatto; non insieme ad azienda_id"
+     },
+     "azienda_id": {
+      "description": "diario delle note dell'azienda (l'id è in scheda_contatto di un suo referente, campo azienda.id); non insieme a contatto_id",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
      },
      "testo": {
       "type": "string",
@@ -491,16 +496,25 @@
        "whatsapp",
        "incontro",
        "nota"
-      ]
+      ],
+      "description": "solo con contatto_id"
      },
      "ricevuta": {
       "default": false,
-      "description": "true se è il cliente ad aver chiamato o scritto",
+      "description": "true se è il cliente ad aver chiamato o scritto (solo con contatto_id)",
       "type": "boolean"
+     },
+     "tag": {
+      "description": "solo con azienda_id: al massimo 5, es. sopralluogo, preventivo, reclamo",
+      "maxItems": 5,
+      "type": "array",
+      "items": {
+       "type": "string",
+       "maxLength": 40
+      }
      }
     },
     "required": [
-     "contatto_id",
      "testo"
     ]
    },
@@ -515,7 +529,7 @@
   {
    "name": "crea_appuntamento",
    "title": "Crea un appuntamento",
-   "description": "Mette in agenda un appuntamento (prenotazione) per un contatto esistente o per un cliente nuovo (nome + telefono), oppure un evento interno senza cliente (serve il titolo). Con evento_id è una prenotazione per un evento aperto al pubblico: se i posti finiscono avvisa l'utente. Orario in ora italiana.",
+   "description": "Mette in agenda un appuntamento (prenotazione) per un contatto esistente o per un cliente nuovo (nome + telefono), oppure un evento interno senza cliente (serve il titolo). Con evento_id è una prenotazione per un evento aperto al pubblico: se i posti finiscono avvisa l'utente. Con cosa_da_fare_id fissa l'intervento di una cosa da fare (es. la disinfestazione di un'azienda): l'appuntamento è per il suo referente e quando lo si segna «arrivato» la cosa da fare diventa fatta. Orario in ora italiana.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -592,6 +606,11 @@
       "description": "nome della sede, se l'attività ne ha più di una (le trovi in riepilogo); senza, la sede principale o quella dell'evento",
       "type": "string",
       "maxLength": 80
+     },
+     "cosa_da_fare_id": {
+      "description": "fissa l'intervento di questa cosa da fare (da elenco_cose_da_fare): cliente e titolo vengono da lì se non li indichi",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
      }
     },
     "required": [
@@ -609,7 +628,7 @@
   {
    "name": "aggiorna_appuntamento",
    "title": "Aggiorna un appuntamento",
-   "description": "Cambia lo stato (confermato, arrivato, non presentato, annullato), la spesa, l'orario, le persone o le note di un appuntamento. \"Arrivato\" registra la visita: un potenziale cliente diventa cliente. Annullare non cancella: l'appuntamento resta nella storia del cliente. Prima di annullare o cambiare uno o più appuntamenti elenca quali (chi, quando) e chiedi conferma all'utente.",
+   "description": "Cambia lo stato (confermato, arrivato, non presentato, annullato), la spesa, l'orario, le persone o le note di un appuntamento. \"Arrivato\" registra la visita: un potenziale cliente diventa cliente e le cose da fare collegate (interventi) diventano fatte, con la successiva se si ripetono; riportarlo indietro non le riapre. Annullare non cancella: l'appuntamento resta nella storia del cliente. Prima di annullare o cambiare uno o più appuntamenti elenca quali (chi, quando) e chiedi conferma all'utente.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -690,7 +709,7 @@
   {
    "name": "crea_cosa_da_fare",
    "title": "Crea una cosa da fare",
-   "description": "Aggiunge una cosa da fare (nel gestionale: pagina Attività), assegnata all'utente, con scadenza e se serve un contatto o un appuntamento collegato.",
+   "description": "Aggiunge una cosa da fare (nel gestionale: pagina Attività, per i consulenti Scadenze), assegnata all'utente (e se serve ad altre persone), con scadenza e se serve un contatto o un appuntamento collegato. Con ripeti_ogni_mesi è una scadenza che si ripete (es. 6 = due volte l'anno, 12 = ogni anno, 36 = ogni 3 anni); con ripeti_ogni_giorni ogni N giorni (14 = ogni 2 settimane); con ripeti_settimana_del_mese e ripeti_giorno_settimana insieme a ripeti_ogni_mesi in un giorno fisso (1, 1 e 1 = il primo lunedì di ogni mese). Quando la si segna fatta nasce la successiva; se la sua data è già passata si salta alla prima da oggi in poi. Con ripeti_ogni_giorni niente avvisa_cliente.",
    "inputSchema": {
     "type": "object",
     "properties": {
@@ -732,6 +751,44 @@
      "note": {
       "type": "string",
       "maxLength": 5000
+     },
+     "persone": {
+      "description": "nomi di altre persone dell'attività a cui assegnarla, oltre all'utente",
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 100
+      }
+     },
+     "ripeti_ogni_mesi": {
+      "description": "si ripete ogni N mesi; la successiva parte dalla scadenza prevista",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 60
+     },
+     "ripeti_ogni_giorni": {
+      "description": "si ripete ogni N giorni (7 = ogni settimana); non insieme a ripeti_ogni_mesi",
+      "type": "integer",
+      "minimum": 7,
+      "maximum": 364
+     },
+     "ripeti_settimana_del_mese": {
+      "description": "giorno fisso del mese: 1–4 = primo…quarto, -1 = ultimo; con ripeti_ogni_mesi e ripeti_giorno_settimana",
+      "type": "integer",
+      "minimum": -1,
+      "maximum": 4
+     },
+     "ripeti_giorno_settimana": {
+      "description": "giorno fisso del mese: 1 = lunedì … 7 = domenica; con ripeti_settimana_del_mese",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 7
+     },
+     "avvisa_cliente": {
+      "description": "WhatsApp al contatto 15 giorni prima della scadenza (serve contatto_id e il suo consenso a WhatsApp; non con ripeti_ogni_giorni)",
+      "type": "boolean"
      }
     },
     "required": [
@@ -749,7 +806,7 @@
   {
    "name": "segna_cosa_da_fare",
    "title": "Segna una cosa da fare",
-   "description": "Segna una cosa da fare come fatta, in corso o di nuovo da fare.",
+   "description": "Segna una cosa da fare come fatta, in corso o di nuovo da fare. Se si ripete, segnarla fatta crea la successiva (una sola, anche se la si riapre e richiude): dillo all'utente con la data.",
    "inputSchema": {
     "type": "object",
     "properties": {
